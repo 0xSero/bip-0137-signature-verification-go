@@ -13,6 +13,99 @@ A Go library for verifying Bitcoin message signatures according to BIP-0137.
 - Comprehensive error handling
 - Support for different Bitcoin networks (mainnet, testnet, etc.)
 
+## Getting Started
+
+This guide will walk you through testing the signature verification with a real Bitcoin signature.
+
+### Prerequisites
+
+- Go 1.20 or higher
+- Node.js 16 or higher
+- npm
+
+### Step 1: Clone the Repository
+
+```bash
+git clone https://github.com/sero/btc.git
+cd btc
+```
+
+### Step 2: Install JavaScript Dependencies
+
+The project includes a Node.js script to generate Bitcoin signatures for testing:
+
+```bash
+# Navigate to the test directory
+cd bitcoin-test
+
+# Install dependencies
+npm install bitcoinjs-lib bitcoinjs-message ecpair tiny-secp256k1
+```
+
+### Step 3: Generate a Test Signature
+
+Run the test script to generate a new Bitcoin keypair and signature:
+
+```bash
+# Still in the bitcoin-test directory
+node test-signature.js
+```
+
+You should see output similar to:
+
+```
+Address: 194vDb9xwY6XQi5bLa7FRPBewJdUqympZ9
+Private Key (WIF): KyHQRjPpeBdizD7Q3iArJx5qZQyRmxRrSdZg41VEAkhGJNQZ1k7g
+Message: Hello, Bitcoin testing!
+Signature (Base64): IOeVH/0KqgmS3XKwqCJiwlcHonwxKMQN6fbOW5UsXSDZB4EGCVTXx6c+ZU/Ae5qO94MSBZn2aPOiUsupRIwBaAU="
+
+Copy these values to your Go test:
+{
+    name:      "Valid Bitcoin signature",
+    address:   "194vDb9xwY6XQi5bLa7FRPBewJdUqympZ9",
+    message:   "Hello, Bitcoin testing!",
+    signature: "IOeVH/0KqgmS3XKwqCJiwlcHonwxKMQN6fbOW5UsXSDZB4EGCVTXx6c+ZU/Ae5qO94MSBZn2aPOiUsupRIwBaAU=",
+    wantValid: true,
+    wantErr:   false,
+},
+```
+
+### Step 4: Verify the Signature
+
+Now that you have a signature, you can verify it using the example program:
+
+```bash
+# Return to the project root
+cd ..
+
+# Build and run the example
+go run examples/verify_signature.go
+```
+
+For more detailed logging during verification:
+
+```bash
+# Run with the trace logging level enabled
+LOG_LEVEL=trace go run examples/verify_signature.go
+```
+
+The output will show detailed verification steps, including:
+- The decoded signature header byte
+- Address type detection
+- Network parameters
+- Verification results
+
+### Step 5: Try with Your Own Message
+
+You can modify the `test-signature.js` script to use your own message:
+
+```javascript
+// In test-signature.js, change:
+const message = "Your custom message here";
+```
+
+Then repeat steps 3 and 4 to generate and verify a new signature.
+
 ## Installation
 
 ```bash
