@@ -145,7 +145,8 @@ func TestVerifyBip137SignatureWithContext(t *testing.T) {
 		{
 			name: "Context timeout",
 			ctx: func() context.Context {
-				ctx, _ := context.WithTimeout(context.Background(), 1*time.Nanosecond)
+				ctx, cancel := context.WithTimeout(context.Background(), 1*time.Nanosecond)
+				defer cancel()                    // Call cancel to avoid context leak
 				time.Sleep(10 * time.Millisecond) // Ensure timeout triggers
 				return ctx
 			}(),
