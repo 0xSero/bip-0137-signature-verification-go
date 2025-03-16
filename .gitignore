@@ -1,6 +1,5 @@
 bitcoin-test/node_modules
 bitcoin-test/package-lock.json
-bitcoin-test/package.json
 bitcoin-test/tsconfig.json
 bitcoin-test/tsconfig.node.json
 bitcoin-test/tsconfig.app.json

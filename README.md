@@ -5,6 +5,7 @@ A Go library for verifying Bitcoin message signatures according to BIP-0137.
 ## Features
 
 - Verify Bitcoin message signatures (BIP-0137 compliant)
+- Verification using both Bitcoin addresses and public keys directly
 - Support for different Bitcoin address types:
   - P2PKH (legacy addresses)
   - P2WPKH-P2SH (SegWit nested in P2SH)
@@ -12,6 +13,7 @@ A Go library for verifying Bitcoin message signatures according to BIP-0137.
 - Context-based verification with timeout support
 - Comprehensive error handling
 - Support for different Bitcoin networks (mainnet, testnet, etc.)
+- Detailed logging for debugging verification processes
 
 ## Getting Started
 
@@ -143,6 +145,56 @@ func main() {
 }
 ```
 
+### Verification with Public Key
+
+When you already have the public key, you can verify signatures directly without needing to derive an address:
+
+```go
+package main
+
+import (
+    "encoding/hex"
+    "fmt"
+    "github.com/btcsuite/btcd/btcec/v2"
+    "github.com/sero/btc/verify"
+)
+
+func main() {
+    message := "Hello, Bitcoin!"
+    signature := "IBFyn+h9m3pWYbB4fBFKlRzBD4eJKojgCIZSNdhLKKHPSV2/WkeV7R7IOI0dpo3uGAEpCz9eepXLrA5kF35MXuU="
+
+    // Hex-encoded public key
+    pubKeyHex := "02d0de0aaeacd02fee9c0059ef1296e276f0a5c0e95a26bf909c879a9305d0dc3"
+
+    // Decode public key from hex
+    pubKeyBytes, err := hex.DecodeString(pubKeyHex)
+    if err != nil {
+        fmt.Printf("Error decoding public key: %v\n", err)
+        return
+    }
+
+    // Parse the public key
+    pubKey, err := btcec.ParsePubKey(pubKeyBytes)
+    if err != nil {
+        fmt.Printf("Error parsing public key: %v\n", err)
+        return
+    }
+
+    // Verify signature using the public key directly
+    valid, err := verify.VerifyBip137SignatureWithPubKey(pubKey, message, signature)
+    if err != nil {
+        fmt.Printf("Error: %v\n", err)
+        return
+    }
+
+    if valid {
+        fmt.Println("Signature is valid!")
+    } else {
+        fmt.Println("Signature is invalid!")
+    }
+}
+```
+
 ### With Context and Timeout
 
 ```go
@@ -217,6 +269,56 @@ func main() {
 }
 ```
 
+### Public Key Verification with Context and Timeout
+
+```go
+package main
+
+import (
+    "context"
+    "encoding/hex"
+    "fmt"
+    "time"
+    "github.com/btcsuite/btcd/btcec/v2"
+    "github.com/sero/btc/verify"
+)
+
+func main() {
+    // Create a context with a timeout
+    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+    defer cancel()
+
+    message := "Hello, Bitcoin!"
+    signature := "IBFyn+h9m3pWYbB4fBFKlRzBD4eJKojgCIZSNdhLKKHPSV2/WkeV7R7IOI0dpo3uGAEpCz9eepXLrA5kF35MXuU="
+
+    // Hex-encoded public key
+    pubKeyHex := "02d0de0aaeacd02fee9c0059ef1296e276f0a5c0e95a26bf909c879a9305d0dc3"
+
+    // Decode and parse the public key
+    pubKeyBytes, _ := hex.DecodeString(pubKeyHex)
+    pubKey, _ := btcec.ParsePubKey(pubKeyBytes)
+
+    // Verify with context support
+    valid, err := verify.VerifyBip137SignatureWithPubKeyAndContext(
+        ctx,
+        pubKey,
+        message,
+        signature,
+    )
+
+    if err != nil {
+        fmt.Printf("Error: %v\n", err)
+        return
+    }
+
+    if valid {
+        fmt.Println("Signature is valid!")
+    } else {
+        fmt.Println("Signature is invalid!")
+    }
+}
+```
+
 ## How It Works
 
 This library uses the [BitonicNL/verify-signed-message](https://github.com/BitonicNL/verify-signed-message) package to perform the actual signature verification, adding additional error handling, context support, and a more idiomatic Go API.
@@ -228,6 +330,11 @@ BIP-0137 message signatures include a header byte that indicates the type of add
 3. Recovers the public key from the signature
 4. Derives the Bitcoin address from the recovered public key
 5. Compares it with the provided address
+
+For direct public key verification, the process is slightly different:
+1. Decodes the base64 signature
+2. Extracts the header byte to determine signature format and recovery ID
+3. Directly verifies the signature against the provided public key without address derivation
 
 ## License
 

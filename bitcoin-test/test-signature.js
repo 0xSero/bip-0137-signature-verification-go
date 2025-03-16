@@ -15,6 +15,7 @@ const privateKeyWIF = keyPair.toWIF();
 
 // Convert public key to proper format for payments
 const pubkeyBuffer = Buffer.from(keyPair.publicKey);
+const pubKeyHex = pubkeyBuffer.toString('hex');
 
 // Generate Bitcoin address
 const { address } = bitcoin.payments.p2pkh({
@@ -32,6 +33,7 @@ const signature = bitcoinMessage.sign(message, privateKeyBuffer, keyPair.compres
 // Display the results
 console.log("Address:", address);
 console.log("Private Key (WIF):", privateKeyWIF);
+console.log("Public Key (hex):", pubKeyHex);
 console.log("Message:", message);
 console.log("Signature (Base64):", signature.toString('base64'));
 
@@ -41,6 +43,7 @@ console.log("{\n    name:      \"Valid Bitcoin signature\",");
 console.log(`    address:   "${address}",`);
 console.log(`    message:   "${message}",`);
 console.log(`    signature: "${signature.toString('base64')}",`);
+console.log(`    pubKey:    "${pubKeyHex}",`);
 console.log("    wantValid: true,");
 console.log("    wantErr:   false,");
 console.log("},");
